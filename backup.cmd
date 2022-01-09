@@ -35,7 +35,7 @@ set LOG=%TMPDIR%\~backup.txt
 if not exist "%TMPDIR%" mkdir "%TMPDIR%"
 
 echo Detecting device...
-%UPDATER% SCANOUT>%SCANOUT%
+%UPDATER% scan>%SCANOUT%
 findstr "port[0-9]*" %SCANOUT%>nul
 if %ERRORLEVEL% equ 0 (
   echo Device connected...
