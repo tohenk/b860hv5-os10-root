@@ -87,7 +87,7 @@ The steps is outlined below:
 6. Flash Magisk patched boot image
 7. Flash TWRP image
 8. Flash empty CONF image
-9. Restart device and complete setup and connect to network using WiFi, note the IP address
+9. Restart device then complete setup and connect to network using WiFi, note the IP address
 10. Enable Developer Options and then activate USB debugging
 11. Using adb, connect to device IP and install Magisk app
 12. Restore saved CONF partition
