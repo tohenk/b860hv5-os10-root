@@ -171,3 +171,10 @@ Done rooting...
 
 Restart your device, after that you can customize the device as you need.
 To access adb from outside the device you may need install ADB over Ethernet app.
+
+## TWRP Recovery
+
+Access to TWRP recovery is possible only using shell. Install a terminal emulator
+app or use adb shell and issue `reboot recovery`. You may need to be root to do that.
+System partition of Android 10 is read only, for now TWRP can only mounts the
+partition as read only. So, no write yet.
