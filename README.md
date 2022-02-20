@@ -85,12 +85,11 @@ The steps is outlined below:
 4. Wipe cache and data
 5. Set device to unlocked state
 6. Flash Magisk patched boot image
-7. Flash TWRP image
-8. Flash empty CONF image
-9. Restart device then complete setup and connect to network using WiFi, note the IP address
-10. Enable Developer Options and then activate USB debugging
-11. Using adb, connect to device IP and install Magisk app
-12. Restore saved CONF partition
+7. Flash empty CONF image
+8. Restart device then complete setup and connect to network using WiFi, note the IP address
+9. Enable Developer Options and then activate USB debugging
+10. Using adb, connect to device IP and install Magisk app
+11. Restore saved CONF partition
 
 ## Rooting
 
@@ -140,6 +139,11 @@ ZTE B860H v5 OS 10 Root
 (c) 2022 Toha <tohenk@yahoo.com>
 --------------------------------
 
+Choose device firmware...
+List of available firmwares:
+1. V83011303.0026
+2. V83011303.0033
+Choose firware to root [2]? 2
 Detecting device...
 Device connected...
 
@@ -148,7 +152,6 @@ Backup partition conf...
 Wiping cache and data...
 Unlock boot loader...
 Flashing boot...
-Flashing recovery...
 Flashing conf...
 
 Reboot your device and complete the setup
@@ -156,6 +159,8 @@ Connect using WiFi and note the IP address
 Enable Developer Options and activate USB debugging
 
 IP address of your device=172.16.1.45
+* daemon not running; starting now at tcp:5037
+* daemon started successfully
 
 Make sure to allow this computer to access ADB
 then Magisk App will be installed to your device
@@ -174,7 +179,26 @@ To access adb from outside the device you may need install ADB over Ethernet app
 
 ## TWRP Recovery
 
+The recent rooting process excludes TWRP recovery by default, to install TWRP
+simply DD-ing `twrp-b860hv5.img` will be suffice.
+
+```
+cd C:\b860hv5-os10-root
+adb connect 172.16.1.45:5555
+adb devices
+adb push data\twrp-b860hv5.img /sdcard
+adb shell
+su
+dd if=/sdcard/twrp-b860hv5.img of=/dev/block/recovery
+rm /sdcard/twrp-b860hv5.img
+```
+
 Access to TWRP recovery is possible only using shell. Install a terminal emulator
 app or use adb shell and issue `reboot recovery`. You may need to be root to do that.
 System partition of Android 10 is read only, for now TWRP can only mounts the
 partition as read only. So, no write yet.
+
+## Customization
+
+Customization can be achieved using Magisk Module like `Debloater (Terminal Emulator)`
+to be able to replace default launcher.

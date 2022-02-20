@@ -3,7 +3,7 @@
 :: ZTE B860H v5 OS 10 Root
 :: Copyright (c) 2022 Toha <tohenk@yahoo.com>
 ::
-:: Last Modified: Jan 09, 2022
+:: Last Modified: Feb 20, 2022
 
 title ZTE B860H v5 OS 10 Root
 echo ZTE B860H v5 OS 10 Root
@@ -11,7 +11,7 @@ echo (c) 2022 Toha ^<tohenk@yahoo.com^>
 echo --------------------------------
 echo.
 
-setlocal
+setlocal EnableDelayedExpansion
 
 :: Change to current directory,
 :: vista run as administrator always start from SYSDIR
@@ -31,18 +31,27 @@ set TMPDIR=%CD%tmp
 set FLASHTOOL=%BIN%\aml-flash-tool
 set UPDATER=%FLASHTOOL%\update.exe
 set CONFIMG=%CONFDIR%\conf.PARTITION
-set BOOTIMG=%DATADIR%\magisk_patched-23000_zMk2J.img
-set RECOVERYIMG=%DATADIR%\twrp-b860hv5.img
+::set BOOTIMG=%DATADIR%\magisk_patched-23000_zMk2J.img
 set EMPTYCONFIMG=%DATADIR%\conf.PARTITION
 set MAGISKAPP=%DATADIR%\Magisk-v23.0.apk
 set SCANOUT=%TMPDIR%\~dev.txt
 set PINGOUT=%TMPDIR%\~ping.txt
 set ADBOUT=%TMPDIR%\~adb.txt
 set LOG=%TMPDIR%\~root.txt
+set FIRMTMP=%TMPDIR%\~firmware.txt
 
 set ADB="%BIN%\Minimal ADB and Fastboot\adb.exe"
 
 if not exist "%TMPDIR%" mkdir "%TMPDIR%"
+
+echo Choose device firmware...
+call :list_firmwares
+if not [%FIRMWARE%]==[] (
+  set BOOTIMG=%DATADIR%\%FIRMWARE%\boot.img
+) else (
+  echo Currently no root available, aborting...
+  goto :end
+)
 
 echo Detecting device...
 %UPDATER% scan>%SCANOUT%
@@ -69,7 +78,7 @@ if not exist "%CONFIMG%" (
 
 call :wipe_cache_and_data
 call :unlock_boot_loader
-call :flash_boot_recovery_conf
+call :flash_boot_and_conf
 
 echo.
 echo Reboot your device and complete the setup
@@ -122,6 +131,34 @@ echo.
 
 goto :end
 
+:list_firmwares
+  set FIRMWARE=
+  set N=0
+  set X=0
+  dir /ad /b %DATADIR%>%FIRMTMP%
+  for /f "tokens=1" %%a in (%FIRMTMP%) do (
+    if exist "%DATADIR%\%%a\boot.img" (
+      set /a N+=1
+      if [!X!]==[0] echo List of available firmwares:
+      echo !N!. %%a
+      if [!X!]==[0] set X=1
+    )
+  )
+  if %N% equ 0 goto :eof
+  set C=%N%
+:list_firmwares_choose
+  set /p C="Choose firware to root [%C%]? "
+  if %C% lss 1 goto :list_firmwares_choose
+  if %C% gtr %N% goto :list_firmwares_choose
+  set N=0
+  for /f "tokens=1" %%a in (%FIRMTMP%) do (
+    if exist "%DATADIR%\%%a\boot.img" (
+      set /a N+=1
+      if !N! equ %C% set FIRMWARE=%%a
+    )
+  )
+  goto :eof
+
 :backup_conf
   set CONF=%~1
   set DIR=%~dp1
@@ -163,9 +200,8 @@ goto :end
   %UPDATER% mread store %PARTITION% normal %SZ% "%IMAGE%">>%LOG%
   goto :eof
 
-:flash_boot_recovery_conf
+:flash_boot_and_conf
   call :do_flash_partition boot "%BOOTIMG%"
-  call :do_flash_partition recovery "%RECOVERYIMG%"
   call :do_flash_partition conf "%EMPTYCONFIMG%"
   goto :eof
 
